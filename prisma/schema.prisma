@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User{
+  id                       String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                     String?
+  email                    String                 @unique(map: "user_email_uindex")
+  password                 String  
+
+  Review                   Review[]
+  MovieStatus              MovieStatus[]
+}
+
+model MovieStatus{
+  id                       String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id                  String                 @db.Uuid   
+  movie_id                 Int
+  status                   MovieStatusEnum
+
+  User                     User                   @relation(fields: [user_id], references: [id])
+}
+
+model Review{
+  id                       String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id                  String                 @db.Uuid 
+  movie_id                 Int
+  description              String                 @db.Text()
+  rating                   Int               
+
+  created_at                            DateTime                  @default(now())
+  updated_at                            DateTime                  @updatedAt
+
+  User                     User                   @relation(fields: [user_id], references: [id])
+}
+
+
+enum MovieStatusEnum{
+  DROPPED
+  PLANED
+  WATCHED
+}
+
+
